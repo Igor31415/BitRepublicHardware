@@ -32,7 +32,8 @@ def grabBitsoilAndPrint():
             printReceipt(myDate, myKey, myAmount)
 
 def printReceipt(myDate, myKey, myAmount):
-    printer.reset() #if you don't reset, the printer starts to fuck up the receipt.
+    printer.wake()       # Call wake() before printing again, even if reset.
+    #printer.reset() #if you don't reset, the printer starts to fuck up the receipt.
     centerText()
     printer.boldOn()
     printer.println(myDate)
@@ -50,12 +51,12 @@ def printReceipt(myDate, myKey, myAmount):
     printer.println (format(myAmount, 'f') + ' Bitsoil')
     printer.println('--------------------------------')
 
-    printer.feed(2)
+    printer.feed(1)
 
     printer.sleep()      # Tell printer to sleep.
-    printer.wake()       # Call wake() before printing again, even if reset.
     printer.setDefault() # Restore printer to defaults.
-
+    printer.reset() #if you don't reset, the printer starts to fuck up the receipt.
+    
 def centerText():
     printer.justify('C')
     
