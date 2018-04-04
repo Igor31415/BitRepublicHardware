@@ -1,26 +1,36 @@
 #!/usr/bin/python
 
-from Adafruit_Thermal import * #https://github.com/adafruit/Python-Thermal-Printer/blob/master/Adafruit_Thermal.py
+from Adafruit_Thermal import *          #https://github.com/adafruit/Python-Thermal-Printer/blob/master/Adafruit_Thermal.py
 from PIL import Image
-import requests #see answer https://stackoverflow.com/questions/25491090/how-to-use-python-to-execute-a-curl-command
-import time #https://www.tutorialspoint.com/python/time_sleep.htm
-import random #https://openclassrooms.com/forum/sujet/python-fonction-randint-et-librairie-random-82775
+import requests                         #see answer https://stackoverflow.com/questions/25491090/how-to-use-python-to-execute-a-curl-command
+import time                             #https://www.tutorialspoint.com/python/time_sleep.htm
+import random                           #https://openclassrooms.com/forum/sujet/python-fonction-randint-et-librairie-random-82775
 
-a = 1 #minimum value of the random.randint
-b = 2 #maximum value of the random.randint
 
-address = 'http://local.bitsoil.tax/api/bitsoil/consume' #address to send the curl request.
-img = Image.open("Bitsoil_Logo384x384Flatened.png") #address of the image printed on the receipt.
+printerCount=1
+maxRequestPerSecond=1
+address = 'http://local.bitsoil.tax/api/bitsoil/consume'            #address to send the curl request.
+img = Image.open("Bitsoil_Logo384x384Flatened.png")                 #address of the image printed on the receipt.
+
+minInterval=4                                                       #minimum value of the random.randint
+maxInterval=max(1, 2*printerCount*maxRequestPerSecond-minInterval)  #maximum value of the random.randint
+# Be sure the minInterval is smaller than maxInterval
+tmp = min(minInterval, maxInterval)
+maxInterval=max(minInterval, maxInterval)
+minInterval=tmp
+
+print("minInterval : "+str(minInterval))
+print("maxInterval : "+str(maxInterval))
 
 printer = Adafruit_Thermal("/dev/serial0", 19200, timeout=5)
 
 def grabBitsoilAndPrint():
-    r = requests.get(address) #send the get request.
-    jdata = r.json()
-    print(r.json())
-    
-    if r.status_code==200: #checks if the server respond
-        if jdata["data"]!=False: #checks if there is data in the output of the server.
+    print("run")
+    r = requests.get(address)           #send the get request.
+    if r.status_code==200:              #checks if the server respond
+        jdata = r.json()
+        print(jdata)
+        if jdata["data"]!=False:        #checks if there is data in the output of the server.
             myDate = (jdata["data"]["date"])
             myKey = (jdata["data"]["publicKey"])
             myAmount = (jdata["data"]["bitsoil"])           
@@ -30,6 +40,8 @@ def grabBitsoilAndPrint():
             print(myAmount)
             ''' #multi-line comment.
             printReceipt(myDate, myKey, myAmount)
+    else :
+        print(r.status_code)
 
 def printReceipt(myDate, myKey, myAmount):
     printer.wake()       # Call wake() before printing again, even if reset.
@@ -59,7 +71,9 @@ def printReceipt(myDate, myKey, myAmount):
     
 def centerText():
     printer.justify('C')
-    
+
 while True:
     grabBitsoilAndPrint() #checks if there is bitsoils available to print, and if there is, it prints it.
-    time.sleep(random.randint(a,b)) #wait for x seconds before re-checking for bitsoils.
+    t=random.randint(minInterval, maxInterval)
+    print("sleep " + str(t) + " seconds")
+    time.sleep(t) #wait for x seconds before re-checking for bitsoils.
