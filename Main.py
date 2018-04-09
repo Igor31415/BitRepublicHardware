@@ -2,10 +2,13 @@ import json                                                     #Allow to open a
 import sys                                                      #Allow the access of files on different directories
 sys.path.append('/home/pi/bitrepublic/printer')
 sys.path.append('/home/pi/bitrepublic/moveDetector')
+sys.path.append('/home/pi/bitrepublic/eu4you/scripts')
 import Print                                                    #Allow executing fonctions from the Print script
 import Tools                                                    #Allow executing fonctions from the Tools script
 import MoveDetector                                             #Allow executing fonctions from the MoveDetector script
 import time                                                     #Allow using the Time.sleep() fonctions
+from eu4youTest import EuForYou
+
 
 config = json.load(open('/home/pi/bitrepublic/Config.json'))    #open the Config.json file to check the behaviour hte rapsberry should have
 behaviour = config["behaviour"]
@@ -29,6 +32,7 @@ if behaviour=="printer":                                        #Execute the pri
         
 if behaviour=="moveDetector":                                    #Execute the moveDetector behaviour if the config specifies the pi is supposed to be a moveDetector
     headers = {"X-Auth-Token": authData["authToken"] , "X-User-Id": authData["userId"]}     #As the script must request the server, the token&Id are needed as headers to be sent to the server
-    MoveDetector.setup()
-    #if sensorTriggered==true:
-    MoveDetector.run(headers)
+    #MoveDetector.setup()
+    #MoveDetector.run(headers)
+    eu4youClass = EuForYou()
+    eu4youClass.run(headers)
