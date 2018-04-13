@@ -6,106 +6,78 @@ import requests                                 #see answer https://stackoverflo
 import time                                     #https://www.tutorialspoint.com/python/time_sleep.htm
 import random                                   #https://openclassrooms.com/forum/sujet/python-fonction-randint-et-librairie-random-82775
 import json
-import Tools
+from threading import Thread
 
-config = None
-printerCount = None
-maxRequestPerSecond = None
-img = None
-address = None
+class Printer(Thread):
+	def __init__(self, headers):
+		Thread.__init__(self)
+		
+		self.headers = headers
+		self.config = json.load(open('/home/pi/bitrepublic/Config.json'))
+		self.printerCount = self.config["printer"]["count"]
+		self.maxRequestPerSecond = self.config["printer"]["maxRequestPerSecond"]
+		self.img = Image.open(self.config["printer"]["img"])
+		self.address = self.config["requests"]["consume"]["Address"]
+		self.minInterval = self.config["printer"]["minInterval"]  
+		self.maxInterval = max(1, 2*self.printerCount*self.maxRequestPerSecond-self.minInterval)
+		self.printer = Adafruit_Thermal("/dev/serial0", 19200, timeout=5)
+															
+		tmp = min(self.minInterval, self.maxInterval)
+		self.maxInterval=max(self.minInterval, self.maxInterval)
+		self.minInterval=tmp
 
-minInterval = None
-maxInterval = None
+		#print("minInterval : "+str(minInterval))
+		#print("maxInterval : "+str(maxInterval))
 
-tmp = None
-maxInterval = None
-minInterval = None
-
-printer = None
-
-def setup():
-    global config
-    global printerCount
-    global maxRequestPerSecond
-    global img
-    global address
-    global minInterval
-    global maxInterval
-    global tmp 
-    global maxInterval
-    global minInterval
-    global printer
+		printer = Adafruit_Thermal("/dev/serial0", 19200, timeout=5)
+		#print("Setup: success")
 
 
-    config = json.load(open('/home/pi/bitrepublic/Config.json'))
-    printerCount = config["printer"]["count"]
-    maxRequestPerSecond = config["printer"]["maxRequestPerSecond"]
-    img = Image.open(config["printer"]["img"])                          #address of the image printed on the receipt.
-    address = config["requests"]["consume"]["Address"]                  #address to send the grabBitSoil request.
+	def grabBitsoilAndPrint(self):
+		print("	Try to get Bitsoil to print...")
+		r = requests.get(self.address, headers=self.headers)                          #send the get request.
+		if r.status_code==200:                                              #checks if the server respond
+			jdata = r.json()
+			#print(jdata)
+			if jdata["data"]!=False:                                        #checks if there is data in the output of the server.
+				myDate = (jdata["data"]["date"])
+				myKey = (jdata["data"]["publicKey"])
+				myAmount = (jdata["data"]["bitsoil"])           
 
-    minInterval = config["printer"]["minInterval"]                      #minimum value of the random.randint
-    maxInterval = max(1, 2*printerCount*maxRequestPerSecond-minInterval)#maximum value of the random.randint
-                                                                        #Be sure the minInterval is smaller than maxInterval
-    tmp = min(minInterval, maxInterval)
-    maxInterval=max(minInterval, maxInterval)
-    minInterval=tmp
+				self.printReceipt(myDate, myKey, myAmount)
+				print("		Got Bitsoil to print.")
+		else :
+			print(r.status_code)
 
-    #print("minInterval : "+str(minInterval))
-    #print("maxInterval : "+str(maxInterval))
+	def printReceipt(self,myDate, myKey, myAmount):
+		self.printer.wake()                                                      # Call wake() before printing again, even if reset.
 
-    printer = Adafruit_Thermal("/dev/serial0", 19200, timeout=5)
-    print("Setup: success")
+		self.printer.justify('C')
+		self.printer.boldOn()
+		self.printer.println(myDate)
+		self.printer.boldOff()
 
-    
-def grabBitsoilAndPrint(headers):
-    print("Try to get Bitsoil")
-    r = requests.get(address, headers=headers)                          #send the get request.
-    if r.status_code==200:                                              #checks if the server respond
-        jdata = r.json()
-        print(jdata)
-        if jdata["data"]!=False:                                        #checks if there is data in the output of the server.
-            myDate = (jdata["data"]["date"])
-            myKey = (jdata["data"]["publicKey"])
-            myAmount = (jdata["data"]["bitsoil"])           
+		self.printer.println('')
 
-            printReceipt(myDate, myKey, myAmount)
-    else :
-        print(r.status_code)
+		self.printer.justify('C')
+		self.printer.println(myKey)
 
-def printReceipt(myDate, myKey, myAmount):
-    printer.wake()                                                      # Call wake() before printing again, even if reset.
-    
-    centerText()
-    printer.boldOn()
-    printer.println(myDate)
-    printer.boldOff()
+		self.printer.printImage(self.img, True)
 
-    printer.println('')
+		self.printer.setSize('M')
+		self.printer.justify('C')
+		self.printer.println (format(myAmount, 'f') + ' Bitsoil')
+		self.printer.println('--------------------------------')
 
-    centerText()
-    printer.println(myKey)
+		self.printer.feed(1)
 
-    printer.printImage(img, True)
+		self.printer.sleep()                                                     # Tell printer to sleep.
+		self.printer.setDefault()                                                # Restore printer to defaults.
+		self.printer.reset()                                                     #if you don't reset, the printer starts to fuck up the receipt.
 
-    printer.setSize('M')
-    centerText()
-    printer.println (format(myAmount, 'f') + ' Bitsoil')
-    printer.println('--------------------------------')
-
-    printer.feed(1)
-
-    printer.sleep()                                                     # Tell printer to sleep.
-    printer.setDefault()                                                # Restore printer to defaults.
-    printer.reset()                                                     #if you don't reset, the printer starts to fuck up the receipt.
-    
-def centerText():
-    printer.justify('C')
-
-def run(headers):
-    #yysetup()
-    while True:
-        #setup()
-        grabBitsoilAndPrint(headers)                                    #checks if there is bitsoils available to print, and if there is, it prints it.
-        t=random.randint(minInterval, maxInterval)
-        print("sleep " + str(t) + " seconds")
-        time.sleep(t)                                                   #wait for x seconds before re-checking for bitsoils.
+	def run(self):
+		while True:
+			self.grabBitsoilAndPrint()                                    #checks if there is bitsoils available to print, and if there is, it prints it.
+			t=random.randint(self.minInterval, self.maxInterval)
+			print("sleep " + str(t) + " seconds")
+			time.sleep(t)                                                   #wait for x seconds before re-checking for bitsoils.
