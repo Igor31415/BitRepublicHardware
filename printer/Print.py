@@ -7,6 +7,7 @@ import time                                     #https://www.tutorialspoint.com/
 import random                                   #https://openclassrooms.com/forum/sujet/python-fonction-randint-et-librairie-random-82775
 import json
 from threading import Thread
+from blessings import Terminal
 
 class Printer(Thread):
 	def __init__(self, headers):
@@ -31,21 +32,21 @@ class Printer(Thread):
 
 		printer = Adafruit_Thermal("/dev/serial0", 19200, timeout=5)
 		#print("Setup: success")
-
+		self.t = Terminal()
+		print(self.t.italic('Hi there! : I\'m the Printer'))
 
 	def grabBitsoilAndPrint(self):
-		print("	Try to get Bitsoil to print...")
+		print(self.t.italic('Printer : is there any new bitsoil ?'))
 		r = requests.get(self.address, headers=self.headers)                          #send the get request.
 		if r.status_code==200:                                              #checks if the server respond
 			jdata = r.json()
-			#print(jdata)
 			if jdata["data"]!=False:                                        #checks if there is data in the output of the server.
 				myDate = (jdata["data"]["date"])
 				myKey = (jdata["data"]["publicKey"])
 				myAmount = (jdata["data"]["bitsoil"])           
-
+				print(self.t.italic('Printer : Yes ! so I\'ve to do...'))
 				self.printReceipt(myDate, myKey, myAmount)
-				print("		Got Bitsoil to print.")
+				
 		else :
 			print(r.status_code)
 
@@ -79,5 +80,5 @@ class Printer(Thread):
 		while True:
 			self.grabBitsoilAndPrint()                                    #checks if there is bitsoils available to print, and if there is, it prints it.
 			t=random.randint(self.minInterval, self.maxInterval)
-			print("sleep " + str(t) + " seconds")
+			print(self.t.italic('Printer : Pfiouf... See you in ' + str(t) + ' seconds'))
 			time.sleep(t)                                                   #wait for x seconds before re-checking for bitsoils.
