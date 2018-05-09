@@ -2,7 +2,7 @@
 # @Author: Evrard Vincent
 # @Date:   2018-05-01 13:40:34
 # @Last Modified by:   vincent
-# @Last Modified time: 2018-05-01 16:41:07
+# @Last Modified time: 2018-05-02 18:41:32
 
 import os
 import json
@@ -42,7 +42,7 @@ class fillTheQueue(object):
 							myId = (data["number"])
 							myAmount*=1000000.0
 
-							myPhrase = "The wallet " + myKey + " has " + str(int(myAmount)) + " micro bitsoils"
+							myPhrase = "The wallet " + myKey + " has " + str(int(myAmount)) + (" microBitsoils").decode("utf8")
 							#myPhrase = "The user " + str(myId) + " has " + str(int(myAmount)) + " micro bitsoils"
 							q.put((0, myPhrase))
 							print("add : " + myPhrase)
@@ -60,10 +60,10 @@ class Displayer(Thread):
 			"Claim a #BITSOILTAX",
 			"Send your claim to the Prime Minister",
 			"Time to net giants to pay",
-			"JOIN THE BITSOIL CAMPAIGN",
-			"TAKE PART OF THE REDISTRIBUTION",
-			"Contact us : mailus@bitsoil.tax",
-			"Bitsoil is the new oil of the digital economy",
+			"join the bitsoil campaign",
+			"take part of the redistribution",
+			"Contact us : campaign@bitsoil.tax",
+			"#Bitsoil is the new oil of the digital economy",
 			"Claim your fair share of this world’s newest resource"
 		]
 		for sentence in self.baseSentences:
@@ -78,7 +78,7 @@ class Displayer(Thread):
 			print("Display : " + str(p) + " - " +item)
 
 			if p == 0:
-				subprocess.call(self.buildRequest(item, 15), stdout=open(os.devnull, 'wb'), stderr=open(os.devnull, 'wb'))	
+				subprocess.call(self.buildRequest(item, 8), stdout=open(os.devnull, 'wb'), stderr=open(os.devnull, 'wb'))	
 			else :
 				subprocess.call(self.buildRequest(item, random.randint(2, 20)), stdout=open(os.devnull, 'wb'), stderr=open(os.devnull, 'wb'))
 				q.put((random.randint(p, p+2+len(self.baseSentences)), item))
