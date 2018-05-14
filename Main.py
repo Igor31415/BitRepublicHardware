@@ -6,7 +6,7 @@ sys.path.append('/home/pi/bitrepublic/speaker')
 sys.path.append('/home/pi/bitrepublic/fanDriver')
 sys.path.append('/home/pi/bitrepublic/displayer')
 sys.path.append('/home/pi/bitrepublic/eu4you/scripts')
-import Print                                                    #Allow executing fonctions from the Print script
+#import Print                                                    #Allow executing fonctions from the Print script
 import Tools                                                    #Allow executing fonctions from the Tools script
 #import MoveDetector                                             #Allow executing fonctions from the MoveDetector script
 import time                                                     #Allow using the Time.sleep() fonctions
