@@ -41,6 +41,7 @@ class Printer(Thread):
 		if r.status_code==200:                                              #checks if the server respond
 			jdata = r.json()
 			if jdata["data"]!=False:                                        #checks if there is data in the output of the server.
+				print(jdata["data"])
 				myDate = (jdata["data"]["date"])
 				myKey = (jdata["data"]["publicKey"])
 				myAmount = (jdata["data"]["bitsoil"])           
