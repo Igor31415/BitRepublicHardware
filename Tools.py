@@ -14,6 +14,7 @@ def setup ():
     config = json.load(open('/home/pi/bitrepublic/Config.json'))#Open the Config.json file to check the behaviour hte rapsberry should have
     address = config["requests"]["login"]["Address"]
     data = {'username': socket.gethostname(),'password': config["requests"]["login"]["password"],'hashed': True}    #'hashed': True informs the server that the password is crypted in sha256
+    print(data);
     data["password"] = hashPassword(data["password"])                                                               #Calls hashPassword() and update the password in the data object
 
 def hashPassword(pwd):                                          #There is where the witcraft happens, the math i meant
