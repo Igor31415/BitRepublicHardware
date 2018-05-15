@@ -26,19 +26,23 @@ def hashPassword(pwd):                                          #There is where 
 def login():
     global address
     global data
-    r = requests.post(address, data=data)                       #Post request sent to the server
-    if  r.status_code == 200:                                   #Checks if the server respond (success of the request)
-        jdata = r.json()                                        #Stock the data from the request in jdata
-        if jdata["data"]!=False:                                #Ckecking if jdata is false. The request can succeed but the response may not be the authData
-            myAuthToken = (jdata["data"]["authToken"])
-            myUserId = (jdata["data"]["userId"])
-            dataList = {'authToken': myAuthToken, 'userId': myUserId}   #Creating an object to return the userId and the authToken
-            return dataList
+    try:
+        r = requests.post(address, data=data)                       #Post request sent to the server
+        if  r.status_code == 200:                                   #Checks if the server respond (success of the request)
+            jdata = r.json()                                        #Stock the data from the request in jdata
+            if jdata["data"]!=False:                                #Ckecking if jdata is false. The request can succeed but the response may not be the authData
+                myAuthToken = (jdata["data"]["authToken"])
+                myUserId = (jdata["data"]["userId"])
+                dataList = {'authToken': myAuthToken, 'userId': myUserId}   #Creating an object to return the userId and the authToken
+                return dataList
         
-        else:
-            print("jdata: false")
-            return False
+            else:
+                print("jdata: false")
+                return False
             
-    else:
-        print("Login failed, status code: " + str(r.status_code))
+        else:
+            print("Login failed, status code: " + str(r.status_code))
+            return False
+    except Exception:
+        print("Login failed")
         return False
