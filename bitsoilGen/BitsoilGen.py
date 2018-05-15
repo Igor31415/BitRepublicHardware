@@ -25,7 +25,7 @@ class BitsoilGenerator(Thread):
     def run(self):
         while True:
             input_state = GPIO.input(17)    
-            if(!self.oldState && input_state):
+            if(self.oldState == False && input_state):
                 print("ACTION")
             self.oldState = input_state
             
