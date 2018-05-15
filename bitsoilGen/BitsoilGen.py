@@ -20,11 +20,15 @@ class BitsoilGenerator(Thread):
         #self.p = GPIO.PWM(13, 100)
         #self.p.start(0)
         self.t = Terminal()
+        self.oldState = False
         print(self.t.bold('Hi there! : I\'m the Bitsoil Generator'))
     def run(self):
         while True:
             input_state = GPIO.input(17)    
-            print(str(input_state))
+            if(!self.oldState && input_state):
+                print("ACTION")
+            self.oldState = input_state
+            
             time.sleep(0.33)
             #print(self.t.bold('BitsoilGenerator : is there any body here ?'))
             #r = requests.get(self.address, headers=self.headers)                #send the get request.
