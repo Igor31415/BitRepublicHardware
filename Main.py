@@ -4,6 +4,7 @@ sys.path.append('/home/pi/bitrepublic/printer')
 sys.path.append('/home/pi/bitrepublic/moveDetector')
 sys.path.append('/home/pi/bitrepublic/speaker')
 sys.path.append('/home/pi/bitrepublic/fanDriver')
+sys.path.append('/home/pi/bitrepublic/bitsoilGen')
 sys.path.append('/home/pi/bitrepublic/displayer')
 sys.path.append('/home/pi/bitrepublic/eu4you/scripts')
 #import Print                                                    #Allow executing fonctions from the Print script
@@ -14,6 +15,7 @@ from eu4youTest import EuForYou
 from Print import Printer
 from Speak import Speaker
 from FanDrive import FanDriver
+from BitsoilGen import BitsoilGenerator
 from Display import Displayer
 
 config = json.load(open('/home/pi/bitrepublic/Config.json'))    #open the Config.json file to check the behaviour hte rapsberry should have
@@ -46,6 +48,10 @@ if behaviour=="fanPrinter":
     thread_Fan = FanDriver(headers)
     thread_Print.start()
     thread_Fan.start() 
+
+if behaviour=="bitsoilGen":
+    thread_Bit = BitsoilGenerator(headers)
+    thread_Bit.start() 
 
 if behaviour=="displayer":
     thread_Display = Displayer(headers)
