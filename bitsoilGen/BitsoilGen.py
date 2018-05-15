@@ -26,15 +26,17 @@ class QueueGen(object):
 
     def loop(self):
         while True:
-            time.sleep(3)
+            time.sleep(10)
             if not q.empty():
-                r = requests.post(self.address, headers=self.headers)                          #send the get request.
-                if r.status_code==200:                                              #checks if the server respond
-                    q.get()
-                    print("BITSOIL Generated")
-                else : 
-                    print("error")
-
+                try:
+                    r = requests.post(self.address, headers=self.headers)                          #send the get request.
+                    if r.status_code==200:                                              #checks if the server respond
+                        q.get()
+                        print("BITSOIL Generated")
+                    else : 
+                        print("error")
+                except Exception:
+                    pass
 
 class BitsoilGenerator(Thread):
     def __init__(self, headers):
