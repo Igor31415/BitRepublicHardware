@@ -29,10 +29,10 @@ class Speaker(Thread):
 					processedMykey = list(myKey)
 					pMykey = (" ").join(processedMykey)
 					
-					myPhrase = "The wallet: " + pMykey + " received: " + str(int(myAmount)) + "micro bitsoil"  
-					args = ["espeak", myPhrase]
-					
+					myPhrase = "A wallet have received: " + str(int(myAmount)) + "micro bitsoil"  
+					args = ["aplay", "/home/pi/bitrepublic/speaker/tweet.wav"]
+#	play speaker/Twitter\ Sound\ Fx-7GL2YrrIhoc.wav				
 					subprocess.call(args, stdout=open(os.devnull, 'wb'), stderr=open(os.devnull, 'wb'))
 					print("		Got Bitsoil to speak, and going to sleep.")
-					time.sleep(12)
-			time.sleep(random.randint(2, 6))
+					#time.sleep(12)
+			time.sleep(random.randint(30, 90))
