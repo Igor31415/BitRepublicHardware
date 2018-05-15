@@ -25,7 +25,7 @@ class BitsoilGenerator(Thread):
         while True:
             input_state = GPIO.input(17)    
             print(str(input_state))
-            time.sleep(1)
+            time.sleep(0.33)
             #print(self.t.bold('BitsoilGenerator : is there any body here ?'))
             #r = requests.get(self.address, headers=self.headers)                #send the get request.
             #if r.status_code==200:                                              #checks if the server respond
