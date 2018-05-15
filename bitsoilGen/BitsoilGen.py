@@ -26,7 +26,7 @@ class QueueGen(object):
 
     def loop(self):
         while True:
-            time.sleep(10)
+            time.sleep(3)
             if not q.empty():
                 try:
                     r = requests.post(self.address, headers=self.headers)                          #send the get request.
