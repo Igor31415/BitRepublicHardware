@@ -3,6 +3,8 @@ import time
 import random
 import requests
 from threading import Thread
+import threading
+import Queue
 import RPi.GPIO as GPIO
 from blessings import Terminal
 
@@ -10,6 +12,29 @@ GPIO.setwarnings(False)
 GPIO.setmode(GPIO.BCM)
 #GPIO.setup(13, GPIO.OUT)
 GPIO.setup(17, GPIO.IN, pull_up_down=GPIO.PUD_DOWN)
+
+q = Queue.Queue()
+
+class QueueGen(object):
+    def __init__(self, headers):
+        self.headers = headers
+        self.config = json.load(open('/home/pi/bitrepublic/Config.json'))
+        self.address = self.config["requests"]["genBitSoil"]["Address"]
+        self.thread = threading.Thread(target=self.loop)
+        # thread.daemon = True
+        self.thread.start()
+
+    def loop(self):
+        while True:
+            time.sleep(3)
+            if not q.empty():
+                r = requests.post(self.address, headers=self.headers)                          #send the get request.
+                if r.status_code==200:                                              #checks if the server respond
+                    q.get()
+                    print("BITSOIL Generated")
+                else : 
+                    print("error")
+
 
 class BitsoilGenerator(Thread):
     def __init__(self, headers):
@@ -22,25 +47,13 @@ class BitsoilGenerator(Thread):
         self.t = Terminal()
         self.oldState = False
         print(self.t.bold('Hi there! : I\'m the Bitsoil Generator'))
+        QueueGen(headers)
     def run(self):
         while True:
             input_state = GPIO.input(17)    
             if(self.oldState == False and input_state):
                 print("ACTION")
+                q.put("genbitsoil")
             self.oldState = input_state
             
             time.sleep(0.33)
-            #print(self.t.bold('BitsoilGenerator : is there any body here ?'))
-            #r = requests.get(self.address, headers=self.headers)                #send the get request.
-            #if r.status_code==200:                                              #checks if the server respond
-            #    jdata = r.json()
-            #    if jdata["data"]!=False:                                        #checks if there is data in the output of the server.
-            #        print(self.t.bold('Fandriver : Yes ! so let the wind blow your mind'))
-            #        self.p.ChangeDutyCycle(100)
-            #        time.sleep(5)
-                    #p.stop()
-                    #GPIO.cleanup()
-            #self.p.ChangeDutyCycle(0)
-            #t = random.randint(2, 6)
-            #print(self.t.bold('Fandriver : I need a small nap.'))
-            #time.sleep(t)
