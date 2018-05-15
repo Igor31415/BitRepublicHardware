@@ -29,8 +29,8 @@ class Speaker(Thread):
 					processedMykey = list(myKey)
 					pMykey = (" ").join(processedMykey)
 					
-					myPhrase = "The wallet: " + pMykey + " received: " + str(int(myAmount)) + "micro bitsoil"  
-					args = ["espeak", myPhrase]
+					myPhrase = "A wallet have received: " + str(int(myAmount)) + "micro bitsoil"  
+					args = ["espeak", "-ven+f3", "-s160", "-p55", myPhrase]
 					
 					subprocess.call(args, stdout=open(os.devnull, 'wb'), stderr=open(os.devnull, 'wb'))
 					print("		Got Bitsoil to speak, and going to sleep.")
