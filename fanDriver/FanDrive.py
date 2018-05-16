@@ -29,7 +29,7 @@ class FanDriver(Thread):
                 if jdata["data"]!=False:                                        #checks if there is data in the output of the server.
                     print(self.t.bold('Fandriver : Yes ! so let the wind blow your mind'))
                     self.p.ChangeDutyCycle(100)
-                    time.sleep(5)
+                    time.sleep(random.randint(5, 15))
                     #p.stop()
                     #GPIO.cleanup()
             self.p.ChangeDutyCycle(0)
